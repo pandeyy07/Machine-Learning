@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
-
-# In[120]:
-
-
+#importing all the necessary libraries
 get_ipython().run_line_magic('matplotlib', 'inline')
 import pandas as pd
 import numpy as np
@@ -18,53 +15,25 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import ExtraTreesRegressor
 from sklearn.linear_model import LinearRegression
 
-
-# In[68]:
-
-
+#reading the data files
 train = pd.read_csv('tcd ml 2019-20 income prediction training (with labels).csv')
 test = pd.read_csv('tcd ml 2019-20 income prediction test (without labels).csv')
 
-
-# In[69]:
-
-
+#testing if your object has the right type of data in it by using .head
 train.head()
-
-
-# In[70]:
-
-
 test.head()
 
-
-# In[71]:
-
-
+#basic statistical details like percentile, mean, std etc.
 train.describe()
 
-
-# In[72]:
-
-
+#nullity matrix is a data-dense display which lets you quickly visually pick out patterns in data completion.
 missingno.matrix(train, figsize = (30,10))
-
-
-# In[73]:
-
 
 test.describe()
 
-
-# In[74]:
-
-
 missingno.matrix(test, figsize = (30,10))
 
-
-# In[75]:
-
-
+#function to find missing values
 def find_missing_no(df, columns):
     missing_val = {}
     print('Number of Missing at each column')
@@ -76,153 +45,72 @@ def find_missing_no(df, columns):
 
 find_missing_no(train, columns=train.columns)
 
-
-# In[76]:
-
-
+#defined dataframe
 new_df = pd.DataFrame()
 
-
-# In[77]:
-
-
+#counts and displays the sum of null values
 train.isnull().sum()
 
-
-# In[78]:
-
-
+#YearofRecord
 print(train['Year of Record'].isnull().sum())
 print(test['Year of Record'].isnull().sum())
 
-
-# In[79]:
-
-
+#Fill NA/NaN values using the specified method.
 train['Year of Record'].fillna(train['Year of Record'].mode()[0], inplace = True)
 test['Year of Record'].fillna(test['Year of Record'].mode()[0], inplace =True)
 print(train.head())
 
-
-# In[80]:
-
-
 print(train['Year of Record'].isnull().sum())
 print(test['Year of Record'].isnull().sum())
 
-
-# In[81]:
-
-
+#Gender
+#Return a Series containing counts of unique values.
 print(train['Gender'].value_counts())
-
-
-# In[82]:
-
 
 train['Gender'].fillna('unknown', inplace=True)
 test['Gender'].fillna('unknown', inplace=True)
 
-
-# In[83]:
-
-
+#Age
 train['Age'].fillna(train['Age'].mode()[0],inplace=True)
 test['Age'].fillna(test['Age'].mode()[0], inplace=True)
 
-
-# In[84]:
-
-
+#Profession
 print(train['Profession'].isnull().sum())
 
-
-# In[85]:
-
-
 print(train['Profession'].value_counts())
-
-
-# In[86]:
-
 
 train['Profession'].fillna(train['Profession'].mode()[0], inplace=True)
 test['Profession'].fillna(test['Profession'].mode()[0], inplace=True)
 print(train['Profession'].value_counts())
 
-
-# In[87]:
-
-
+#UniversityDegree
 print(train['University Degree'].value_counts())
-
-
-# In[88]:
-
 
 train['University Degree'].fillna(train['University Degree'].mode()[0], inplace=True)
 test['University Degree'].fillna(test['University Degree'].mode()[0], inplace=True)
 print(train['University Degree'].value_counts())
 
-
-# In[89]:
-
-
+#HairColor
 train['Hair Color'].fillna('Unknown', inplace=True)
 test['Hair Color'].fillna('Unknown', inplace=True)
 
-
-# In[90]:
-
-
 print(train['Hair Color'].value_counts())
 
-
-# In[91]:
-
-
+#Calling Function to /find Missig Number
 find_missing_no(train, columns=train.columns)
-
-
-# In[92]:
-
-
 find_missing_no(test, columns=test.columns)
 
-
-# In[93]:
-
-
+#to distinguish which data came from which data set
 train['flag'] = 1
 test['flag'] = 0
 
-
-# In[94]:
-
-
 together_df = pd.DataFrame()
 
-
-# 
-# 
-# **Creating a dataframe with combined test and train dataset
-# Doing this so that the features in both test and train datasets are the same after one hot encoding**
-
-# In[95]:
-
-
+#Creating a combined dataframe of train and test data so that the features in both are the same
 together_df = pd.concat([train,test])
 le = preprocessing.LabelEncoder()
 
-
-# In[96]:
-
-
 find_missing_no(test, columns=test.columns)
-
-
-# In[97]:
-
 
 le.fit(together_df['Profession'])
 together_df['Profession'] = le.transform(together_df['Profession'])
@@ -232,147 +120,65 @@ country_onehot = pd.get_dummies(together_df['Country'],prefix='country')
 deg_onehot = pd.get_dummies(together_df['University Degree'],prefix='deg')
 haircol_onehot = pd.get_dummies(together_df['Hair Color'],prefix='haircol')
 
-
-# In[98]:
-
-
 together_df = pd.concat([together_df, gender_onehot, country_onehot, deg_onehot, haircol_onehot], axis=1)
 
-
-# In[99]:
-
-
+#Checking the new dataframe
 together_df.head()
 
-
-# In[100]:
-
-
+#Droping the Irelevant colums from the dataset
 together_df.drop(['Country','Gender','Hair Color','Income','University Degree'],axis=1,inplace=True)
 
-
-# In[101]:
-
-
 together_df.head()
 
-
-# In[102]:
-
-
+#Distinguishing between train and test dataframes
 train_df = together_df[together_df['flag'] == 1]
 test_df = together_df[together_df['flag'] == 0]
 
-
-# In[103]:
-
-
+#Return a tuple representing the dimensionality of the DataFrame.
 print(train_df.shape)
 print(test_df.shape)
 
-
-# In[104]:
-
-
 train_df.head()
-
-
-# In[105]:
-
-
 train_df.drop(['flag'],axis=1,inplace=True)
 
-
-# In[106]:
-
-
+#Set the DataFrame index using existing column.
 train_df.set_index('Instance')
-
-
-# In[107]:
-
 
 test_df.drop(['flag'],axis=1,inplace=True)
 
-
-# In[108]:
-
-
 test_df.set_index('Instance')
-
-
-# In[109]:
-
 
 test_df.drop(['Income in EUR'],axis=1,inplace=True)
 
-
-# In[110]:
-
-
 train_df.shape
-
-
-# In[111]:
-
 
 #Handling outliers
 temp = train_df.sort_values(by=['Income in EUR'])
 plt.scatter(temp['Age'], temp['Income in EUR'])
 plt.show()
 
-
-# In[112]:
-
-
 temp = temp[:-8]
 temp.shape
-
-
-# In[113]:
-
 
 plt.scatter(temp['Age'], temp['Income in EUR'])
 plt.show()
 
 
-# In[114]:
-
-
+#defining train parametters for the regressor
 train.data = pd.DataFrame()
 train_x = temp.drop('Income in EUR', axis=1)
 train_y = temp['Income in EUR']
 
-
-# In[115]:
-
-
-regr_etr = ExtraTreesRegressor(n_estimators = 10, random_state = 0)
+#Defining the model for ExtraTree Regressor with n_estiators=80, which is bascially number of trees in the forest
+regr_etr = ExtraTreesRegressor(n_estimators = 80, random_state = 0)
 model_etr = regr_etr.fit(train_x, train_y)
 acc = (model_etr.score(train_x, train_y))
-
-
-# In[116]:
-
-
-
-
 regr = LinearRegression()
 model = regr.fit(train_x, train_y) 
 acc = (model.score(train_x, train_y))
 
-
-# In[117]:
-
-
+#making a csv file for the submission
 test_dataset =regr_etr.predict(test_df)
 filename = 'submission.csv'
 pd.DataFrame({'Instance': test_df['Instance'], 'Income': test_dataset}).to_csv(filename, index=False)
 print(acc)
-
-
-# In[ ]:
-
-
-
-
