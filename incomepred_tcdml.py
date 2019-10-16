@@ -182,3 +182,6 @@ test_dataset =regr_etr.predict(test_df)
 filename = 'submission.csv'
 pd.DataFrame({'Instance': test_df['Instance'], 'Income': test_dataset}).to_csv(filename, index=False)
 print(acc)
+
+#References: https://www.youtube.com/watch?v=f1y9wDDxWnA&feature=youtu.be
+
